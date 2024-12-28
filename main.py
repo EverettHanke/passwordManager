@@ -16,12 +16,21 @@ from cryptography.fernet import Fernet
 #*********************************************
 backend = default_backend()
 salt = b'2444'
-kdf = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=salt, iterations=100000, backend=backend)
+# kdf = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=salt, iterations=100000, backend=backend)
 encryptionKey = 0
+def derive_key(password: str) -> bytes:
+    kdf = PBKDF2HMAC(
+        algorithm=hashes.SHA256(),
+        length=32,
+        salt=salt,
+        iterations=100000,
+        backend=backend
+    )
+    return base64.urlsafe_b64encode(kdf.derive(password.encode()))
 def encrypt(message: bytes, key: bytes) -> bytes:
     return Fernet(key).encrypt(message)
 def decrypt(message: bytes, token: bytes) -> bytes:
-    return Fernet(token).encrypt(message)
+    return Fernet(token).decrypt(message)
 
 with sqlite3.connect("passwords.db") as db:
     cursor = db.cursor()
@@ -96,7 +105,7 @@ def createMasterPassword():
             recoveryKey = hashPassword(key.encode('utf-8'))
 
             global encryptionKey
-            encryptionKey = base64.urlsafe_b64encode(kdf.derive(txtEntry.get().encode()))
+            encryptionKey = derive_key(txtEntry.get()) #encryptionKey = base64.urlsafe_b64encode(derive_key(txtEntry.get()))
 
 
             print("Password saved")
@@ -141,13 +150,13 @@ def recoveryKeyScreen(key):
 
 
 def resetPasswordScreen():
-    #clear old window
+    # Clear old window
     for widget in window.winfo_children():
         widget.destroy()
 
     window.geometry("350x150")
     
-    lbl = Label(window, text="=Enter your recovery key")
+    lbl = Label(window, text="Enter your recovery key")
     lbl.config(anchor=CENTER)
     lbl.pack()
 
@@ -159,23 +168,51 @@ def resetPasswordScreen():
     lblError.config(anchor=CENTER)
     lblError.pack()
 
-    
-
     def getRecoveryKey():
         recoveryKeyCheck = hashPassword(txtEntry.get().encode('utf-8'))
         cursor.execute("SELECT recoveryKey FROM masterpassword WHERE id = 1 AND recoveryKey = ?", [(recoveryKeyCheck)])
         return cursor.fetchone()
-    
+
     def checkRecoveryKey():
         checked = getRecoveryKey()
         if checked:
+            # Fetch existing password data
+            cursor.execute("SELECT id, website, email, password FROM passwordVault")
+            existing_data = cursor.fetchall()
+            
+            # Decrypt existing data using the old encryption key
+            decrypted_data = [
+                (
+                    row[0],
+                    decrypt(row[1], encryptionKey).decode(),
+                    decrypt(row[2], encryptionKey).decode(),
+                    decrypt(row[3], encryptionKey).decode()
+                )
+                for row in existing_data
+            ]
+            
+            # Prompt for new master password
             createMasterPassword()
+            
+            # Re-encrypt data with the new encryption key
+            for row in decrypted_data:
+                new_website = encrypt(row[1].encode(), encryptionKey)
+                new_email = encrypt(row[2].encode(), encryptionKey)
+                new_password = encrypt(row[3].encode(), encryptionKey)
+                cursor.execute(
+                    "UPDATE passwordVault SET website = ?, email = ?, password = ? WHERE id = ?",
+                    (new_website, new_email, new_password, row[0])
+                )
+            db.commit()
         else:
-            txtEntry.delete(0,'end')
+            txtEntry.delete(0, 'end')
             lblError.config(text="Incorrect recovery key")
 
     btnSubmit = Button(window, text="Submit", command=checkRecoveryKey)
     btnSubmit.pack(pady=10)
+
+
+
 
 # login screen function
 def loginScreen():
@@ -201,7 +238,7 @@ def loginScreen():
         
         #print(checkHashedPassword)
         global encryptionKey
-        encryptionKey = base64.urlsafe_b64encode(kdf.derive(txtEntry.get().encode()))
+        encryptionKey = derive_key(txtEntry.get()) #encryptionKey = base64.urlsafe_b64encode(kdf.derive(txtEntry.get().encode()))
 
         cursor.execute("SELECT password FROM masterpassword WHERE id = 1 AND password = ?", [(checkHashedPassword)])
         return cursor.fetchone()
@@ -225,6 +262,33 @@ def loginScreen():
 
     btnReset = Button(window, text="Reset Password", command=resetPassword)
     btnReset.pack(pady=10)
+
+
+def recalibrateEncryptionKey():
+    # Fetch existing password data
+    cursor.execute("SELECT id, website, email, password FROM passwordVault")
+    existing_data = cursor.fetchall()
+    
+    # Decrypt existing data using the old encryption key
+    decrypted_data = [
+        (
+            row[0],
+            decrypt(row[1], encryptionKey).decode(),
+            decrypt(row[2], encryptionKey).decode(),
+            decrypt(row[3], encryptionKey).decode()
+        )
+        for row in existing_data
+    ]
+    # Re-encrypt data with the new encryption key
+    for row in decrypted_data:
+        new_website = encrypt(row[1].encode(), encryptionKey)
+        new_email = encrypt(row[2].encode(), encryptionKey)
+        new_password = encrypt(row[3].encode(), encryptionKey)
+        cursor.execute(
+            "UPDATE passwordVault SET website = ?, email = ?, password = ? WHERE id = ?",
+            (new_website, new_email, new_password, row[0])
+        )
+    db.commit()
 
 
 # main screen function
@@ -270,32 +334,18 @@ def mainScreen():
     lblGridPass.grid(row=2, column=2, padx=80)
 
     cursor.execute("SELECT * FROM passwordVault")
-    if(cursor.fetchall()!= None):
-        i = 0
-        while(True):
-            cursor.execute("SELECT * FROM passwordVault")
-            array = cursor.fetchall()
+    array = cursor.fetchall()  # Fetch all data once
 
-            if (len(array)==0):
-                break
-
-            lblWebRes = Label(window, text=(decrypt(array[i][1], encryptionKey)), font=("Helvetica", 12))
+    if array:  # Check if array is not empty
+        for i, row in enumerate(array):
+            lblWebRes = Label(window, text=(decrypt(row[1], encryptionKey)).decode(), font=("Helvetica", 12))
             lblWebRes.grid(column=0, row=i+3)
 
-            lblEmailRes = Label(window, text=(decrypt(array[i][2], encryptionKey)), font=("Helvetica", 12))
+            lblEmailRes = Label(window, text=(decrypt(row[2], encryptionKey)).decode(), font=("Helvetica", 12))
             lblEmailRes.grid(column=1, row=i+3)
 
-            lblPassRes = Label(window, text=(decrypt(array[i][3], encryptionKey)), font=("Helvetica", 12))
+            lblPassRes = Label(window, text=(decrypt(row[3], encryptionKey)).decode(), font=("Helvetica", 12))
             lblPassRes.grid(column=2, row=i+3)
-            
-            btnDel = Button(window, text="Delete", command=partial(deleteEntry, array[i][0]))
-            btnDel.grid(row=i+3, column=3, pady=10)
-            i = i+1
-
-            cursor.execute("SELECT * FROM passwordVault")
-            if(len(cursor.fetchall()) <= i):
-                break
-
 
   
 
