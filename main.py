@@ -71,7 +71,9 @@ def hashPassword(password):
 # LOGIN/SIGN IN/MAIN SCREEN
 #*********************************************
 
-# page that allows users to create a master password
+#*********************************************
+# CREATE MASTER PASSWORD SCREEN
+#*********************************************
 def createMasterPassword():
     window.geometry("350x150")
     
@@ -120,6 +122,10 @@ def createMasterPassword():
     btnSubmit = Button(window, text="Save", command=savePassword)
     btnSubmit.pack(pady=10)
 
+
+#*********************************************
+# Recovery Key Screen
+#*********************************************
 def recoveryKeyScreen(key):
     #clear old window
     for widget in window.winfo_children():
@@ -148,7 +154,9 @@ def recoveryKeyScreen(key):
     btnContinue.pack(pady=10)
 
 
-
+#*********************************************
+# RESET PASSWORD SCREEN
+#*********************************************
 def resetPasswordScreen():
     # Clear old window
     for widget in window.winfo_children():
@@ -213,7 +221,9 @@ def resetPasswordScreen():
 
 
 
-
+#*********************************************
+# LOGIN/SIGN IN/MAIN SCREEN
+#*********************************************
 # login screen function
 def loginScreen():
     #clear old window
@@ -263,7 +273,9 @@ def loginScreen():
     btnReset = Button(window, text="Reset Password", command=resetPassword)
     btnReset.pack(pady=10)
 
-
+#*********************************************
+# RECALIBRATE ENCRYPTION KEY
+#*********************************************
 def recalibrateEncryptionKey():
     # Fetch existing password data
     cursor.execute("SELECT id, website, email, password FROM passwordVault")
@@ -291,7 +303,9 @@ def recalibrateEncryptionKey():
     db.commit()
 
 
-# main screen function
+#*********************************************
+# MAIN SCREEN
+#*********************************************
 def mainScreen():
     #clear old window
     for widget in window.winfo_children():
@@ -351,7 +365,9 @@ def mainScreen():
 
     
 
-# display window
+#*********************************************
+# DISPLAY WINDOW
+#*********************************************
 cursor.execute("SELECT * FROM masterpassword")
 if cursor.fetchall():
    loginScreen()
