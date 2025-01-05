@@ -190,8 +190,7 @@ def firstTimeScreen(hasMasterKey=None):
             key = str(uuid.uuid4().hex)
             hashedRecoveryKey = hashPassword(key.encode())
 
-            insert_password = """INSERT INTO masterpassword(password, recoveryKey)
-            VALUES(?, ?) """
+            insert_password = """INSERT INTO masterpassword(password, recoveryKey) VALUES(?, ?) """
             cursor.execute(insert_password, ((hashedPassword), (hashedRecoveryKey)))
 
             # Check if masterkey exists, if it does replace it by encrypting it with new password hash, and new recoverykey hash
@@ -201,8 +200,7 @@ def firstTimeScreen(hasMasterKey=None):
             if cursor.fetchall():
                 cursor.execute("DELETE FROM masterkey WHERE id = 1")
 
-            insert_masterkey = """INSERT INTO masterkey(masterKeyPassword, masterKeyRecoveryKey)
-            VALUES(?, ?) """
+            insert_masterkey = """INSERT INTO masterkey(masterKeyPassword, masterKeyRecoveryKey) VALUES(?, ?) """
             cursor.execute(
                 insert_masterkey,
                 (
@@ -231,7 +229,7 @@ def recoveryScreen(key):
     for widget in window.winfo_children():
         widget.destroy()
 
-    window.geometry("250x125")
+    window.geometry("350x250")
     lblInstructions = ttk.Label(window, text="Save this key to be able to recover account")
     lblInstructions.config(anchor=CENTER)
     lblInstructions.pack()
