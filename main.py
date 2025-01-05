@@ -11,8 +11,14 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.fernet import Fernet
 import secrets
 import string
+from tkinter import ttk
 
+#set theme:
+#style = ttk.Style()
+#style.theme_use('clam') 
+#note: if we use a style we would have to change label and button to their counterparts in the style such as ttk.ttk.Button and ttk.ttk.Label
 
+#backend encryuption:
 backend = default_backend()
 salt = b"2444"
 
@@ -66,6 +72,35 @@ window.update()
 
 window.title("Password Manager")
 
+# Initialize the style for a Discord-like theme
+style = ttk.Style()
+style.theme_use('clam')  # Use 'clam' theme as the base
+
+# Define custom colors
+primary_color = "#2c2f33"  # Discord dark gray
+secondary_color = "#23272a"  # Darker gray
+accent_color = "#7289da"    # Discord blue
+text_color = "#ffffff"      # White text
+
+# Configure the style
+style.configure(
+    "TLabel",
+    background=primary_color,
+    foreground=text_color,
+    font=("Helvetica", 12),
+)
+style.configure("TButton",background=secondary_color,foreground=text_color,borderwidth=1,padding=5,relief="flat",font=("Helvetica", 10, "bold"),)
+style.map("TButton",background=[("active", accent_color)],foreground=[("active", "#ffffff")],)
+style.configure("TEntry",fieldbackground=secondary_color,foreground=text_color,insertbackground=text_color,  # Cursor colorborderwidth=1,
+font=("Helvetica", 12),
+)
+# Set the root window background color
+window.configure(bg=primary_color)
+
+
+# Update `Label` and `ttk.Button` to `ttk.Label` and `ttk.ttk.Button` respectively
+# Update `ttk.Entry` to `ttk.ttk.Entry
+
 #*************************************************************
 # HASH PASSWORD //note refractored to work now :)
 #*************************************************************
@@ -81,23 +116,23 @@ def firstTimeScreen(hasMasterKey=None):
     for widget in window.winfo_children():
         widget.destroy()
 
-    window.geometry("250x125")
-    lblEntry = Label(window, text="Choose a Master Password")
+    window.geometry("300x300")
+    lblEntry = ttk.Label(window, text="Choose a Master Password")
     lblEntry.config(anchor=CENTER)
     lblEntry.pack()
 
-    txtPasswordEntry = Entry(window, width=20, show="*")
+    txtPasswordEntry = ttk.Entry(window, width=20, show="*")
     txtPasswordEntry.pack()
     txtPasswordEntry.focus()
 
-    lblReEntry = Label(window, text="Re-enter password")
+    lblReEntry = ttk.Label(window, text="Re-enter password")
     lblReEntry.config(anchor=CENTER)
     lblReEntry.pack()
 
-    txtPasswordReEntry = Entry(window, width=20, show="*")
+    txtPasswordReEntry = ttk.Entry(window, width=20, show="*")
     txtPasswordReEntry.pack()
 
-    lblError = Label(window)
+    lblError = ttk.Label(window)
     lblError.config(anchor=CENTER)
     lblError.pack()
 
@@ -145,7 +180,7 @@ def firstTimeScreen(hasMasterKey=None):
         else:
             lblError.config(text="Passwords dont match")
 
-    btnSubmit = Button(window, text="Save", command=savePassword)
+    btnSubmit = ttk.Button(window, text="Save", command=savePassword)
     btnSubmit.pack(pady=5)
 
 #*************************************************************
@@ -156,24 +191,24 @@ def recoveryScreen(key):
         widget.destroy()
 
     window.geometry("250x125")
-    lblInstructions = Label(window, text="Save this key to be able to recover account")
+    lblInstructions = ttk.Label(window, text="Save this key to be able to recover account")
     lblInstructions.config(anchor=CENTER)
     lblInstructions.pack()
 
-    lblUserKey = Label(window, text=key)
+    lblUserKey = ttk.Label(window, text=key)
     lblUserKey.config(anchor=CENTER)
     lblUserKey.pack()
 
     def copyKey():
         pyperclip.copy(lblUserKey.cget("text"))
 
-    btnCopy = Button(window, text="Copy Key", command=copyKey)
+    btnCopy = ttk.Button(window, text="Copy Key", command=copyKey)
     btnCopy.pack(pady=5)
 
     def done():
         vaultScreen()
 
-    btnDone = Button(window, text="Done", command=done)
+    btnDone = ttk.Button(window, text="Done", command=done)
     btnDone.pack(pady=5)
 
 #*************************************************************
@@ -184,15 +219,15 @@ def resetScreen():
         widget.destroy()
 
     window.geometry("250x125")
-    lblInstruction = Label(window, text="Enter Recovery Key")
+    lblInstruction = ttk.Label(window, text="Enter Recovery Key")
     lblInstruction.config(anchor=CENTER)
     lblInstruction.pack()
 
-    txtKeyEntry = Entry(window, width=20)
+    txtKeyEntry = ttk.Entry(window, width=20)
     txtKeyEntry.pack()
     txtKeyEntry.focus()
 
-    lblError = Label(window)
+    lblError = ttk.Label(window)
     lblError.config(anchor=CENTER)
     lblError.pack()
     #*********************************************************
@@ -225,7 +260,7 @@ def resetScreen():
             txtKeyEntry.delete(0, "end")
             lblError.config(text="Key is Invalid")
 
-    btnSubmit = Button(window, text="Check Key", command=checkRecoveryKey)
+    btnSubmit = ttk.Button(window, text="Check Key", command=checkRecoveryKey)
     btnSubmit.pack(pady=5)
 
 #*************************************************************
@@ -235,17 +270,17 @@ def loginScreen():
     for widget in window.winfo_children():
         widget.destroy()
 
-    window.geometry("250x125")
+    window.geometry("300x300")
 
-    lblInstructions = Label(window, text="Enter  Master Password")
+    lblInstructions = ttk.Label(window, text="Enter  Master Password")
     lblInstructions.config(anchor=CENTER)
     lblInstructions.pack()
 
-    txtEntry = Entry(window, width=20, show="*")
+    txtEntry = ttk.Entry(window, width=20, show="*")
     txtEntry.pack()
     txtEntry.focus()
 
-    lblError = Label(window)
+    lblError = ttk.Label(window)
     lblError.config(anchor=CENTER)
     lblError.pack(side=TOP)
 
@@ -292,10 +327,10 @@ def loginScreen():
     def resetPassword():
         resetScreen()
 
-    btnSubmit = Button(window, text="Submit", command=checkPassword)
+    btnSubmit = ttk.Button(window, text="Submit", command=checkPassword)
     btnSubmit.pack(pady=5)
 
-    btnResetPassword = Button(window, text="Reset Password", command=resetPassword)
+    btnResetPassword = ttk.Button(window, text="Reset Password", command=resetPassword)
     btnResetPassword.pack(pady=5)
 
 #*************************************************************
@@ -329,19 +364,19 @@ def vaultScreen():
         db.commit()
         vaultScreen()
 
-    window.geometry("950x750")
+    window.geometry("1250x750")
     window.resizable(height=None, width=None)
-    lblTitle = Label(window, text="Password Manager", font=("Helvetica", 16))
+    lblTitle = ttk.Label(window, text="Password Manager", font=("Helvetica", 16))
     lblTitle.grid(column=1)
 
-    btnAdd = Button(window, text="Add Password", command=addEntry)
+    btnAdd = ttk.Button(window, text="Add Password", command=addEntry)
     btnAdd.grid(column=1, pady=10)
 
-    lblWeb = Label(window, text="Website")
+    lblWeb = ttk.Label(window, text="Website")
     lblWeb.grid(row=2, column=0, padx=80)
-    lblEmail = Label(window, text="Email")
+    lblEmail = ttk.Label(window, text="Email")
     lblEmail.grid(row=2, column=1, padx=80)
-    lblPass = Label(window, text="Password")
+    lblPass = ttk.Label(window, text="Password")
     lblPass.grid(row=2, column=2, padx=80)
 
     cursor.execute("SELECT * FROM vault")
@@ -354,23 +389,23 @@ def vaultScreen():
             if len(array) == 0:
                 break
 
-            lblWebData = Label(window,text=(decrypt(array[i][1], encryptionKey)),font=("Helvetica", 12),)
+            lblWebData = ttk.Label(window,text=(decrypt(array[i][1], encryptionKey)),font=("Helvetica", 12),)
             lblWebData.grid(column=0, row=(i + 3))
 
-            lblEmailData = Label(window,text=(decrypt(array[i][2], encryptionKey)),font=("Helvetica", 12),)
+            lblEmailData = ttk.Label(window,text=(decrypt(array[i][2], encryptionKey)),font=("Helvetica", 12),)
             lblEmailData.grid(column=1, row=(i + 3))
 
             #decrypt password and store as a variable
             password = decrypt(array[i][3], encryptionKey)
 
-            lblPassData = Label(window,text=("********"),font=("Helvetica", 12),)
+            lblPassData = ttk.Label(window,text=("********"),font=("Helvetica", 12),)
             lblPassData.grid(column=2, row=(i + 3))
             
             #create a delete button
-            btnDelete = Button(window, text="Delete", command=partial(removeEntry, array[i][0]))
+            btnDelete = ttk.Button(window, text="Delete", command=partial(removeEntry, array[i][0]))
             btnDelete.grid(column=6, row=(i + 3), pady=10, padx=10) #note: changing column to 6 puts it at the very end of the row
             #create a copy button
-            btnCopy = Button(window, text="Copy", command=partial(pyperclip.copy, password.decode()))
+            btnCopy = ttk.Button(window, text="Copy", command=partial(pyperclip.copy, password.decode()))
             btnCopy.grid(column=4, row=(i + 3), pady=10, padx=10)
 
             #*********************************************************
@@ -384,7 +419,7 @@ def vaultScreen():
                     db.commit()
                     vaultScreen()
             
-            btnUpdate = Button(window, text="Update", command=partial(updatePassword, array[i][0]))
+            btnUpdate = ttk.Button(window, text="Update", command=partial(updatePassword, array[i][0]))
             btnUpdate.grid(column=5, row=(i + 3), pady=10, padx=10)
 
             #*********************************************************
@@ -397,10 +432,8 @@ def vaultScreen():
                     lbl.config(text=password)
 
             #Show password button
-            btnShow = Button(window, text="Show", command=partial(togglePassword, lblPassData, password.decode()))
+            btnShow = ttk.Button(window, text="Show", command=partial(togglePassword, lblPassData, password.decode()))
             btnShow.grid(column=3, row=(i + 3), pady=10, padx=10) #note: changing column to 3 puts it at the very front of the row
-                
-            
 
             #increment i
             i = i + 1
@@ -408,6 +441,11 @@ def vaultScreen():
             cursor.execute("SELECT * FROM vault")
             if len(cursor.fetchall()) <= i:
                 break
+
+
+
+
+
 
 
 #*************************************************************
