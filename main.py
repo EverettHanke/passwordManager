@@ -354,30 +354,40 @@ def vaultScreen():
             if len(array) == 0:
                 break
 
-            lblWebData = Label(
-                window,
-                text=(decrypt(array[i][1], encryptionKey)),
-                font=("Helvetica", 12),
-            )
+            lblWebData = Label(window,text=(decrypt(array[i][1], encryptionKey)),font=("Helvetica", 12),)
             lblWebData.grid(column=0, row=(i + 3))
-            lblEmailData = Label(
-                window,
-                text=(decrypt(array[i][2], encryptionKey)),
-                font=("Helvetica", 12),
-            )
+
+            lblEmailData = Label(window,text=(decrypt(array[i][2], encryptionKey)),font=("Helvetica", 12),)
             lblEmailData.grid(column=1, row=(i + 3))
-            lblPassData = Label(
-                window,
-                text=(decrypt(array[i][3], encryptionKey)),
-                font=("Helvetica", 12),
-            )
+
+            #decrypt password and store as a variable
+            password = decrypt(array[i][3], encryptionKey)
+            
+            lblPassData = Label(window,text=("********"),font=("Helvetica", 12),)
             lblPassData.grid(column=2, row=(i + 3))
-
-            btnDelete = Button(
-                window, text="Delete", command=partial(removeEntry, array[i][0])
-            )
+            
+            #create a delete button
+            btnDelete = Button(window, text="Delete", command=partial(removeEntry, array[i][0]))
             btnDelete.grid(column=3, row=(i + 3), pady=10)
+            #create a copy button
+            btnCopy = Button(window, text="Copy", command=partial(pyperclip.copy, password.decode()))
+            btnCopy.grid(column=4, row=(i + 3), pady=10)
 
+            #TODO: Create an Update Password button here:
+
+            #TODO: Create a Show Password Button here:
+            def togglePassword(lbl, password):
+                if(lbl.cget("text") == password):
+                    lbl.config(text="********")
+                else:
+                    lbl.config(text=password)
+            
+            btnShow = Button(window, text="Show", command=partial(togglePassword, lblPassData, password.decode()))
+            btnShow.grid(column=5, row=(i + 3), pady=10)
+                
+            
+
+            #increment i
             i = i + 1
 
             cursor.execute("SELECT * FROM vault")
