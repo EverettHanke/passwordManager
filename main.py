@@ -67,14 +67,14 @@ window.update()
 
 window.title("Password Manager")
 
-# Initialize the style for a Discord-like theme
+# Initializing style
 style = ttk.Style()
-style.theme_use('clam')  # Use 'clam' theme as the base
+style.theme_use('clam') 
 
 # Define custom colors
-primary_color = "#2c2f33"  # Discord dark gray
+primary_color = "#2c2f33"  # Dark gray
 secondary_color = "#23272a"  # Darker gray
-accent_color = "#7289da"    # Discord blue
+accent_color = "#7289da"    # Hover blue
 text_color = "#ffffff"      # White text
 
 # Configure the style
