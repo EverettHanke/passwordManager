@@ -56,12 +56,7 @@ cursor.execute("""CREATE TABLE IF NOT EXISTS vault(id INTEGER PRIMARY KEY,websit
 cursor.execute("""CREATE TABLE IF NOT EXISTS masterkey(id INTEGER PRIMARY KEY,masterKeyPassword TEXT NOT NULL,masterKeyRecoveryKey TEXT NOT NULL);""")
 
 
-#*************************************************************
-# BASIC POPUP FUNCTION
-#*************************************************************
-def popUp(text):
-    input = simpledialog.askstring("input string", text)
-    return input
+
 
 
 #*************************************************************
@@ -108,6 +103,51 @@ def hashPassword(input):
     hash = hashlib.sha256(input)
     hash = hash.hexdigest()
     return hash
+
+
+#*************************************************************
+# BASIC POPUP FUNCTION
+#*************************************************************
+def popUp(text):
+    def on_submit():
+        nonlocal user_input  # Use a nonlocal variable to store the value
+        user_input = entry.get()
+        popup.destroy()
+
+    def on_cancel():
+        nonlocal user_input
+        user_input = None
+        popup.destroy()
+
+    user_input = None
+    popup = Toplevel()
+    popup.title("Input")
+    popup.geometry("300x150")
+    popup.configure(bg=primary_color)  # Match the primary background color
+
+    popup_label = ttk.Label(popup, text=text, style="TLabel")
+    popup_label.pack(pady=10)
+
+    entry = ttk.Entry(popup, width=30)
+    entry.pack(pady=5)
+    entry.focus()
+
+    button_frame = ttk.Frame(popup, style="TFrame")
+    button_frame.pack(pady=10)
+
+    submit_btn = ttk.Button(button_frame, text="Submit", command=on_submit)
+    submit_btn.pack(side=LEFT, padx=5)
+
+    cancel_btn = ttk.Button(button_frame, text="Cancel", command=on_cancel)
+    cancel_btn.pack(side=LEFT, padx=5)
+
+    popup.transient(window)  # Make the popup modal
+    popup.grab_set()
+    window.wait_window(popup)
+
+    return user_input
+
+
 
 #*************************************************************
 # SET MASTER PASSWORD //note refractored to work now :)
