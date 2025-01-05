@@ -95,9 +95,6 @@ window.configure(bg=primary_color)
 window.iconbitmap("images/lock.ico")
 
 
-# Update `Label` and `ttk.Button` to `ttk.Label` and `ttk.ttk.Button` respectively
-# Update `ttk.Entry` to `ttk.ttk.Entry
-
 #*************************************************************
 # HASH PASSWORD //note refractored to work now :)
 #*************************************************************
@@ -126,6 +123,7 @@ def popUp(text):
     popup.title("Input")
     popup.geometry("300x150")
     popup.configure(bg=primary_color)  # Match the primary background color
+    popup.iconbitmap("images/fingerprint.ico")
 
     popup_label = ttk.Label(popup, text=text, style="TLabel")
     popup_label.pack(pady=10)
@@ -138,18 +136,14 @@ def popUp(text):
     button_frame.pack(pady=10)
 
     submit_btn = ttk.Button(button_frame, text="Submit", command=on_submit)
-    submit_btn.pack(side=LEFT, padx=5)
+    submit_btn.pack(side=LEFT, padx=5, pady=5)
 
     cancel_btn = ttk.Button(button_frame, text="Cancel", command=on_cancel)
-    cancel_btn.pack(side=LEFT, padx=5)
+    cancel_btn.pack(side=RIGHT, padx=5, pady=5)
 
     popup.transient(window)  # Make the popup modal
     popup.grab_set()
     window.wait_window(popup)
-
-
-    #TODO: add an icon to the popup
-    #popup.iconbitmap("images/lock.ico")
 
 
     return user_input
