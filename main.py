@@ -329,7 +329,7 @@ def vaultScreen():
         db.commit()
         vaultScreen()
 
-    window.geometry("750x550")
+    window.geometry("950x750")
     window.resizable(height=None, width=None)
     lblTitle = Label(window, text="Password Manager", font=("Helvetica", 16))
     lblTitle.grid(column=1)
@@ -368,12 +368,14 @@ def vaultScreen():
             
             #create a delete button
             btnDelete = Button(window, text="Delete", command=partial(removeEntry, array[i][0]))
-            btnDelete.grid(column=3, row=(i + 3), pady=10)
+            btnDelete.grid(column=6, row=(i + 3), pady=10, padx=10) #note: changing column to 6 puts it at the very end of the row
             #create a copy button
             btnCopy = Button(window, text="Copy", command=partial(pyperclip.copy, password.decode()))
-            btnCopy.grid(column=4, row=(i + 3), pady=10)
+            btnCopy.grid(column=4, row=(i + 3), pady=10, padx=10)
 
-            #TODO: Create an Update Password button here:
+            #*********************************************************
+            # UPDATE PASSWORD (note: this function is nested) 
+            #*********************************************************
             def updatePassword(entry_ID):
                 newPass = popUp("Enter new password")
                 if(newPass):
@@ -383,7 +385,7 @@ def vaultScreen():
                     vaultScreen()
             
             btnUpdate = Button(window, text="Update", command=partial(updatePassword, array[i][0]))
-            btnUpdate.grid(column=6, row=(i + 3), pady=10)
+            btnUpdate.grid(column=5, row=(i + 3), pady=10, padx=10)
 
             #*********************************************************
             # TOGGLE PASSWORD (note: this function is nested)
@@ -396,7 +398,7 @@ def vaultScreen():
 
             #Show password button
             btnShow = Button(window, text="Show", command=partial(togglePassword, lblPassData, password.decode()))
-            btnShow.grid(column=5, row=(i + 3), pady=10)
+            btnShow.grid(column=3, row=(i + 3), pady=10, padx=10) #note: changing column to 3 puts it at the very front of the row
                 
             
 
