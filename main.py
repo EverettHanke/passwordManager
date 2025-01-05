@@ -92,7 +92,7 @@ font=("Helvetica", 12),
 # Set the root window background color
 window.configure(bg=primary_color)
 # Set the app icon
-window.iconbitmap("lock.ico")
+window.iconbitmap("images/lock.ico")
 
 
 # Update `Label` and `ttk.Button` to `ttk.Label` and `ttk.ttk.Button` respectively
@@ -120,7 +120,7 @@ def popUp(text):
         nonlocal user_input
         user_input = None
         popup.destroy()
-
+    
     user_input = None
     popup = Toplevel()
     popup.title("Input")
@@ -146,6 +146,11 @@ def popUp(text):
     popup.transient(window)  # Make the popup modal
     popup.grab_set()
     window.wait_window(popup)
+
+
+    #TODO: add an icon to the popup
+    #popup.iconbitmap("images/lock.ico")
+
 
     return user_input
 
