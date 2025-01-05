@@ -91,6 +91,8 @@ font=("Helvetica", 12),
 )
 # Set the root window background color
 window.configure(bg=primary_color)
+# Set the app icon
+window.iconbitmap("lock.ico")
 
 
 # Update `Label` and `ttk.Button` to `ttk.Label` and `ttk.ttk.Button` respectively
@@ -379,6 +381,8 @@ def loginScreen():
 def vaultScreen():
     for widget in window.winfo_children():
         widget.destroy()
+
+    window.iconbitmap("images/unlock.ico")
 
     #*********************************************************
     # ADD ENTRY (note: this function is nested)
