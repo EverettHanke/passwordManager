@@ -362,7 +362,7 @@ def vaultScreen():
 
             #decrypt password and store as a variable
             password = decrypt(array[i][3], encryptionKey)
-            
+
             lblPassData = Label(window,text=("********"),font=("Helvetica", 12),)
             lblPassData.grid(column=2, row=(i + 3))
             
@@ -374,14 +374,27 @@ def vaultScreen():
             btnCopy.grid(column=4, row=(i + 3), pady=10)
 
             #TODO: Create an Update Password button here:
+            def updatePassword(entry_ID):
+                newPass = popUp("Enter new password")
+                if(newPass):
+                    newPass = encrypt(newPass.encode(), encryptionKey)
+                    cursor.execute("UPDATE vault SET password = ? WHERE id = ?", (newPass, entry_ID))
+                    db.commit()
+                    vaultScreen()
+            
+            btnUpdate = Button(window, text="Update", command=partial(updatePassword, array[i][0]))
+            btnUpdate.grid(column=6, row=(i + 3), pady=10)
 
-            #TODO: Create a Show Password Button here:
+            #*********************************************************
+            # TOGGLE PASSWORD (note: this function is nested)
+            #*********************************************************
             def togglePassword(lbl, password):
                 if(lbl.cget("text") == password):
                     lbl.config(text="********")
                 else:
                     lbl.config(text=password)
-            
+
+            #Show password button
             btnShow = Button(window, text="Show", command=partial(togglePassword, lblPassData, password.decode()))
             btnShow.grid(column=5, row=(i + 3), pady=10)
                 
