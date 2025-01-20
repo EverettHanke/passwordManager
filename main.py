@@ -12,6 +12,7 @@ from cryptography.fernet import Fernet
 import secrets
 import string
 from tkinter import ttk
+import tkinter as tk
 
 #set theme:
 #style = ttk.Style()
@@ -78,17 +79,17 @@ accent_color = "#7289da"    # Hover blue
 text_color = "#ffffff"      # White text
 
 # Configure the style
-style.configure(
-    "TLabel",
-    background=primary_color,
-    foreground=text_color,
-    font=("Helvetica", 12),
-)
+style.configure("TLabel",background=primary_color,foreground=text_color,font=("Helvetica", 12),)
 style.configure("TButton",background=secondary_color,foreground=text_color,borderwidth=1,padding=5,relief="flat",font=("Helvetica", 10, "bold"),)
 style.map("TButton",background=[("active", accent_color)],foreground=[("active", "#ffffff")],)
 style.configure("TEntry",fieldbackground=secondary_color,foreground=text_color,insertbackground=text_color,  # Cursor colorborderwidth=1,
-font=("Helvetica", 12),
-)
+font=("Helvetica", 12),)
+#Scroll Bar Styling
+style.configure("Vertical.TScrollbar",background=secondary_color,troughcolor=primary_color,arrowcolor=text_color, bordercolor=secondary_color,)
+style.map("Vertical.TScrollbar",background=[("active", accent_color)],arrowcolor=[("active", accent_color)],)
+
+style.configure("Horizontal.TScrollbar",background=secondary_color,troughcolor=primary_color,arrowcolor=text_color,bordercolor=secondary_color,)
+style.map("Horizontal.TScrollbar",background=[("active", accent_color)],arrowcolor=[("active", accent_color)],)
 # Set the root window background color
 window.configure(bg=primary_color)
 # Set the app icon
@@ -375,113 +376,135 @@ def loginScreen():
 #*************************************************************
 # MAIN VAULT SCREEN
 #*************************************************************
+
 def vaultScreen():
+    # Clear existing widgets
     for widget in window.winfo_children():
         widget.destroy()
 
+    # Set window properties
+    window.geometry("1250x750")
+    window.resizable(height=True, width=True)
     window.iconbitmap("images/unlock.ico")
 
-    #*********************************************************
-    # ADD ENTRY (note: this function is nested)
-    #*********************************************************
+    # Configure grid resizing
+    window.grid_rowconfigure(0, weight=1)  # Make row 0 (canvas row) expandable
+    window.grid_columnconfigure(0, weight=1)  # Make column 0 (canvas column) expandable
+    window.grid_columnconfigure(1, weight=0)  # Scrollbar column doesn't need expansion
+
+    # Create a canvas for scrolling
+    canvas = Canvas(window, bg=primary_color, highlightthickness=0)
+    scrollbar = ttk.Scrollbar(window, orient="vertical", command=canvas.yview)
+    scrollable_frame = tk.Frame(canvas, bg=primary_color)
+
+    # Bind scrollable frame to canvas
+    scrollable_frame.bind(
+        "<Configure>",
+        lambda e: canvas.configure(scrollregion=canvas.bbox("all"))  # Adjust scrollable region dynamically
+    )
+
+    # Create window on canvas and attach scrollable frame to canvas
+    frame_id = canvas.create_window((0, 0), window=scrollable_frame, anchor="n")
+    canvas.configure(yscrollcommand=scrollbar.set)
+
+    # Place canvas and scrollbar in the window using grid
+    canvas.grid(row=0, column=0, sticky="nsew")
+    scrollbar.grid(row=0, column=1, sticky="ns")
+
+    # Center scrollable frame dynamically
+    def center_scrollable_frame(event=None):
+        canvas_width = canvas.winfo_width()
+        frame_width = scrollable_frame.winfo_reqwidth()
+        x_offset = (canvas_width - frame_width) // 2  # Calculate center
+        canvas.coords(frame_id, x_offset, 0)  # Update frame position
+
+    # Bind resize events
+    canvas.bind("<Configure>", center_scrollable_frame)
+
+    # Title (centered)
+    lblTitle = ttk.Label(scrollable_frame, text="Password Manager", font=("Helvetica", 16))
+    lblTitle.grid(column=3, row=0, pady=10)
+
+    # Add Entry Button
     def addEntry():
-        prompt1 = "Website"
-        prompt2 = "Username"
-        prompt3 = "Password"
-        prompt1 = encrypt(popUp(prompt1).encode(), encryptionKey)
-        username = encrypt(popUp(prompt2).encode(), encryptionKey)
-        password = encrypt(popUp(prompt3).encode(), encryptionKey)
+        website = encrypt(popUp("Website").encode(), encryptionKey)
+        username = encrypt(popUp("Username").encode(), encryptionKey)
+        password = encrypt(popUp("Password").encode(), encryptionKey)
 
-        insert_fields = """INSERT INTO vault(website, username, password) VALUES(?, ?, ?) """
-        cursor.execute(insert_fields, (prompt1, username, password))
-        db.commit()
-
-        vaultScreen()
-    #*********************************************************
-    # REMOVE ENTRY (note: this function is nested)
-    #*********************************************************
-    def removeEntry(input):
-        cursor.execute("DELETE FROM vault WHERE id = ?", (input,))
+        cursor.execute("INSERT INTO vault(website, username, password) VALUES(?, ?, ?)", (website, username, password))
         db.commit()
         vaultScreen()
 
-    window.geometry("1250x750")
-    window.resizable(height=None, width=None)
-    lblTitle = ttk.Label(window, text="Password Manager", font=("Helvetica", 16))
-    lblTitle.grid(column=1)
+    btnAdd = ttk.Button(scrollable_frame, text="Add Password", command=addEntry)
+    btnAdd.grid(column=3, pady=10, row=1)
 
-    btnAdd = ttk.Button(window, text="Add Password", command=addEntry)
-    btnAdd.grid(column=1, pady=10)
+    # Column labels (centered in grid)
+    lblWeb = ttk.Label(scrollable_frame, text="Website", font=("Helvetica", 12, "bold"))
+    lblWeb.grid(row=2, column=0, padx=20, pady=5)
+    lblEmail = ttk.Label(scrollable_frame, text="Email", font=("Helvetica", 12, "bold"))
+    lblEmail.grid(row=2, column=1, padx=20, pady=5)
+    lblPass = ttk.Label(scrollable_frame, text="Password", font=("Helvetica", 12, "bold"))
+    lblPass.grid(row=2, column=2, padx=20, pady=5)
 
-    lblWeb = ttk.Label(window, text="Website")
-    lblWeb.grid(row=2, column=0, padx=80)
-    lblEmail = ttk.Label(window, text="Email")
-    lblEmail.grid(row=2, column=1, padx=80)
-    lblPass = ttk.Label(window, text="Password")
-    lblPass.grid(row=2, column=2, padx=80)
-
+    # Fetch and display data
     cursor.execute("SELECT * FROM vault")
-    if cursor.fetchall() != None:
-        i = 0
-        while True:
-            cursor.execute("SELECT * FROM vault")
-            array = cursor.fetchall()
+    entries = cursor.fetchall()
 
-            if len(array) == 0:
-                break
+    for i, entry in enumerate(entries):
+        entry_id, website, username, password = entry
+        decrypted_website = decrypt(website, encryptionKey).decode()
+        decrypted_username = decrypt(username, encryptionKey).decode()
+        decrypted_password = decrypt(password, encryptionKey).decode()
 
-            lblWebData = ttk.Label(window,text=(decrypt(array[i][1], encryptionKey)),font=("Helvetica", 12),)
-            lblWebData.grid(column=0, row=(i + 3))
+        # Website
+        lblWebData = ttk.Label(scrollable_frame, text=decrypted_website, font=("Helvetica", 12))
+        lblWebData.grid(column=0, row=i + 3, padx=10, pady=5)
 
-            lblEmailData = ttk.Label(window,text=(decrypt(array[i][2], encryptionKey)),font=("Helvetica", 12),)
-            lblEmailData.grid(column=1, row=(i + 3))
+        # Username
+        lblEmailData = ttk.Label(scrollable_frame, text=decrypted_username, font=("Helvetica", 12))
+        lblEmailData.grid(column=1, row=i + 3, padx=10, pady=5)
 
-            #decrypt password and store as a variable
-            password = decrypt(array[i][3], encryptionKey)
+        # Password
+        lblPassData = ttk.Label(scrollable_frame, text="********", font=("Helvetica", 12))
+        lblPassData.grid(column=2, row=i + 3, padx=10, pady=5)
 
-            lblPassData = ttk.Label(window,text=("********"),font=("Helvetica", 12),)
-            lblPassData.grid(column=2, row=(i + 3))
-            
-            #create a delete button
-            btnDelete = ttk.Button(window, text="Delete", command=partial(removeEntry, array[i][0]))
-            btnDelete.grid(column=6, row=(i + 3), pady=10, padx=10) #note: changing column to 6 puts it at the very end of the row
-            #create a copy button
-            btnCopy = ttk.Button(window, text="Copy", command=partial(pyperclip.copy, password.decode()))
-            btnCopy.grid(column=4, row=(i + 3), pady=10, padx=10)
+        # Toggle Password Function
+        def togglePassword(lbl, password):
+            lbl.config(text=password if lbl.cget("text") == "********" else "********")
 
-            #*********************************************************
-            # UPDATE PASSWORD (note: this function is nested) 
-            #*********************************************************
-            def updatePassword(entry_ID):
-                newPass = popUp("Enter new password")
-                if(newPass):
-                    newPass = encrypt(newPass.encode(), encryptionKey)
-                    cursor.execute("UPDATE vault SET password = ? WHERE id = ?", (newPass, entry_ID))
-                    db.commit()
-                    vaultScreen()
-            
-            btnUpdate = ttk.Button(window, text="Update", command=partial(updatePassword, array[i][0]))
-            btnUpdate.grid(column=5, row=(i + 3), pady=10, padx=10)
+        btnShow = ttk.Button(scrollable_frame, text="Show", command=lambda lbl=lblPassData, pw=decrypted_password: togglePassword(lbl, pw))
+        btnShow.grid(column=3, row=i + 3, padx=10, pady=5)
 
-            #*********************************************************
-            # TOGGLE PASSWORD (note: this function is nested)
-            #*********************************************************
-            def togglePassword(lbl, password):
-                if(lbl.cget("text") == password):
-                    lbl.config(text="********")
-                else:
-                    lbl.config(text=password)
+        # Copy Password Function
+        btnCopy = ttk.Button(scrollable_frame, text="Copy", command=lambda pw=decrypted_password: pyperclip.copy(pw))
+        btnCopy.grid(column=4, row=i + 3, padx=10, pady=5)
 
-            #Show password button
-            btnShow = ttk.Button(window, text="Show", command=partial(togglePassword, lblPassData, password.decode()))
-            btnShow.grid(column=3, row=(i + 3), pady=10, padx=10) #note: changing column to 3 puts it at the very front of the row
+        # Update Password Function
+        def updatePassword(entry_id):
+            new_password = popUp("Enter new password")
+            if new_password:
+                encrypted_new_password = encrypt(new_password.encode(), encryptionKey)
+                cursor.execute("UPDATE vault SET password = ? WHERE id = ?", (encrypted_new_password, entry_id))
+                db.commit()
+                vaultScreen()
 
-            #increment i
-            i = i + 1
+        btnUpdate = ttk.Button(scrollable_frame, text="Update", command=lambda id=entry_id: updatePassword(id))
+        btnUpdate.grid(column=5, row=i + 3, padx=10, pady=5)
 
-            cursor.execute("SELECT * FROM vault")
-            if len(cursor.fetchall()) <= i:
-                break
+        # Remove Entry Function
+        def removeEntry(entry_id):
+            cursor.execute("DELETE FROM vault WHERE id = ?", (entry_id,))
+            db.commit()
+            vaultScreen()
+
+        btnDelete = ttk.Button(scrollable_frame, text="Delete", command=lambda id=entry_id: removeEntry(id))
+        btnDelete.grid(column=6, row=i + 3, padx=10, pady=5)
+
+    # Ensure content is centered within the canvas
+    scrollable_frame.grid_rowconfigure(len(entries) + 3, weight=1)  # Allow content to expand vertically
+
+
+
 
 
 
