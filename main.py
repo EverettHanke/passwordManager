@@ -5,6 +5,7 @@ from functools import partial
 import uuid
 import pyperclip
 import base64
+import random
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.backends import default_backend
@@ -424,6 +425,18 @@ def vaultScreen():
     # Title (centered)
     lblTitle = ttk.Label(scrollable_frame, text="Password Manager", font=("Helvetica", 16))
     lblTitle.grid(column=3, row=0, pady=10)
+
+    # Generate Random Password and Copy to Clipboard
+    def generateRandomPassword():
+        # Generate a random password (12 characters long, including uppercase, lowercase, digits, and symbols)
+        password_length = 12
+        characters = string.ascii_letters + string.digits + string.punctuation
+        random_password = ''.join(random.choice(characters) for _ in range(password_length))
+        pyperclip.copy(random_password)  # Copy the password to clipboard
+        print(f"Generated Password: {random_password}")  # For testing/debugging
+
+    btnGeneratePassword = ttk.Button(scrollable_frame, text="Generate Random Password", command=generateRandomPassword)
+    btnGeneratePassword.grid(column=3, pady=10, row=2)
 
     # Add Entry Button
     def addEntry():
