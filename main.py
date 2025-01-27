@@ -14,6 +14,23 @@ import secrets
 import string
 from tkinter import ttk
 import tkinter as tk
+import os
+import sys
+
+#*************************************************************
+# RESOURCE PATH
+#*************************************************************
+def resource_path(relative_path):
+    """ Get the absolute path to the resource (including .ico files). """
+    try:
+        # PyInstaller creates a temp folder and stores the path to the app in sys._MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+    
+    return os.path.join(base_path, relative_path)
+#*************************END OF RESOURCE PATH****************
+
 
 #set theme:
 #style = ttk.Style()
@@ -94,7 +111,7 @@ style.map("Horizontal.TScrollbar",background=[("active", accent_color)],arrowcol
 # Set the root window background color
 window.configure(bg=primary_color)
 # Set the app icon
-window.iconbitmap("images/lock.ico")
+window.iconbitmap(resource_path("requirements/images/lock.ico"))
 
 
 #*************************************************************
@@ -125,7 +142,7 @@ def popUp(text):
     popup.title("Input")
     popup.geometry("300x150")
     popup.configure(bg=primary_color)  # Match the primary background color
-    popup.iconbitmap("images/fingerprint.ico")
+    popup.iconbitmap(resource_path("requirements/images/fingerprint.ico"))
 
     popup_label = ttk.Label(popup, text=text, style="TLabel")
     popup_label.pack(pady=10)
@@ -386,7 +403,7 @@ def vaultScreen():
     # Set window properties
     window.geometry("1250x750")
     window.resizable(height=True, width=True)
-    window.iconbitmap("images/unlock.ico")
+    window.iconbitmap(resource_path("requirements/images/unlock.ico"))
 
     # Configure grid resizing
     window.grid_rowconfigure(0, weight=1)  # Make row 0 (canvas row) expandable
