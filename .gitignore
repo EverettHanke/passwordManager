@@ -1,1 +1,5 @@
 password_Manager.db
+build
+dist
+main.spec
+password_Manager.spec
