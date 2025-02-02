@@ -35,7 +35,7 @@
         - Download and install Python 3.x from <a href="https://www.python.org/">python.org</a>.<br>
         - Install the necessary libraries:<br>
         <code>pip install pyperclip cryptography</code><br>
-        - Note when packaging the project into an exe be sure to run <code>pyinstaller --onefile --add-data "requirements/images/lock.ico;requirements/images" --add-data "requirements/images/fingerprint.ico;requirements/images" --add-data "requirements/images/unlock.ico;requirements/images" --noconsole main.py</code>
+        - Note when packaging the project into an exe be sure to run <code>pyinstaller --onefile --add-data "requirements/images/lock.ico;requirements/images" --add-data "requirements/images/fingerprint.ico;requirements/images" --add-data "requirements/images/unlock.ico;requirements/images" --noconsole password_manager.py</code>
     </li>
     <li><strong>Running the App</strong>:<br>
         - Run the application by executing <code>password_manager.py</code> in your terminal or command prompt.<br>
