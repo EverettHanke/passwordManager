@@ -506,24 +506,15 @@ def vaultScreen(where):
         decrypted_website = decrypt(website, encryptionKey).decode()
         decrypted_username = decrypt(username, encryptionKey).decode()
         decrypted_password = decrypt(password, encryptionKey).decode()
-        if(where and where.lower() in decrypted_website.lower() or where.lower() in decrypted_username.lower()):
-            # Website
-            lblWebData = ttk.Label(scrollable_frame, text=decrypted_website, font=("Helvetica", 12))
-            lblWebData.grid(column=0, row=i + 3, padx=10, pady=5)
 
-            # Username
-            lblEmailData = ttk.Label(scrollable_frame, text=decrypted_username, font=("Helvetica", 12))
-            lblEmailData.grid(column=1, row=i + 3, padx=10, pady=5)
+        # Skip entries that do NOT match the search if where is provided
+        if where and where.lower() not in decrypted_website.lower() and where.lower() not in decrypted_username.lower():
+            continue  # Skip this entry if no match is found
 
-            # Password
-            lblPassData = ttk.Label(scrollable_frame, text="********", font=("Helvetica", 12))
-            lblPassData.grid(column=2, row=i + 3, padx=10, pady=5)
+        # Website
+        lblWebData = ttk.Label(scrollable_frame, text=decrypted_website, font=("Helvetica", 12))
+        lblWebData.grid(column=0, row=i + 3, padx=10, pady=5)
 
-            # Website
-            lblWebData = ttk.Label(scrollable_frame, text=decrypted_website, font=("Helvetica", 12))
-            lblWebData.grid(column=0, row=i + 3, padx=10, pady=5)
-        else:
-            continue
         # Username
         lblEmailData = ttk.Label(scrollable_frame, text=decrypted_username, font=("Helvetica", 12))
         lblEmailData.grid(column=1, row=i + 3, padx=10, pady=5)
@@ -536,6 +527,7 @@ def vaultScreen(where):
         def togglePassword(lbl, password):
             lbl.config(text=password if lbl.cget("text") == "********" else "********")
 
+        #show password function
         btnShow = ttk.Button(scrollable_frame, text="Show", command=lambda lbl=lblPassData, pw=decrypted_password: togglePassword(lbl, pw))
         btnShow.grid(column=3, row=i + 3, padx=10, pady=5)
 
