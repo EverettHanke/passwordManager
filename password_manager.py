@@ -264,7 +264,7 @@ def recoveryScreen(key):
     btnCopy.pack(pady=5)
 
     def done():
-        vaultScreen()
+        vaultScreen("")
 
     btnDone = ttk.Button(window, text="Done", command=done)
     btnDone.pack(pady=5)
@@ -371,7 +371,7 @@ def loginScreen():
                 global encryptionKey
                 encryptionKey = base64.urlsafe_b64encode(kdf().derive(masterKey))
 
-                vaultScreen()
+                vaultScreen("")
             else:
                 print("Master Key entry missing!")
                 exit()
@@ -395,7 +395,7 @@ def loginScreen():
 # MAIN VAULT SCREEN
 #*************************************************************
 
-def vaultScreen():
+def vaultScreen(where):
     # Clear existing widgets
     for widget in window.winfo_children():
         widget.destroy()
@@ -470,10 +470,21 @@ def vaultScreen():
 
         cursor.execute("INSERT INTO vault(website, username, password) VALUES(?, ?, ?)", (website, username, password))
         db.commit()
-        vaultScreen()
+        vaultScreen("")
 
     btnAdd = ttk.Button(scrollable_frame, text="Add Password", command=addEntry)
     btnAdd.grid(column=3, pady=10, row=1)
+    
+    # Search Function
+    def searchVault():
+        search_query = searchEntry.get().strip()
+        vaultScreen(search_query)  # Reload with search filter
+
+    searchEntry = ttk.Entry(scrollable_frame, width=40)
+    searchEntry.grid(column=0, row=1, columnspan=2, padx=10, pady=10)
+
+    searchButton = ttk.Button(scrollable_frame, text="Search", command=searchVault)
+    searchButton.grid(column=2, row=1, padx=10, pady=10)
 
     # Column labels (centered in grid)
     lblWeb = ttk.Label(scrollable_frame, text="Website", font=("Helvetica", 12, "bold"))
@@ -483,20 +494,36 @@ def vaultScreen():
     lblPass = ttk.Label(scrollable_frame, text="Password", font=("Helvetica", 12, "bold"))
     lblPass.grid(row=2, column=2, padx=20, pady=5)
 
+
+
     # Fetch and display data
     cursor.execute("SELECT * FROM vault")
     entries = cursor.fetchall()
+    #print(entries)
 
     for i, entry in enumerate(entries):
         entry_id, website, username, password = entry
         decrypted_website = decrypt(website, encryptionKey).decode()
         decrypted_username = decrypt(username, encryptionKey).decode()
         decrypted_password = decrypt(password, encryptionKey).decode()
+        if(where and where.lower() in decrypted_website.lower() or where.lower() in decrypted_username.lower()):
+            # Website
+            lblWebData = ttk.Label(scrollable_frame, text=decrypted_website, font=("Helvetica", 12))
+            lblWebData.grid(column=0, row=i + 3, padx=10, pady=5)
 
-        # Website
-        lblWebData = ttk.Label(scrollable_frame, text=decrypted_website, font=("Helvetica", 12))
-        lblWebData.grid(column=0, row=i + 3, padx=10, pady=5)
+            # Username
+            lblEmailData = ttk.Label(scrollable_frame, text=decrypted_username, font=("Helvetica", 12))
+            lblEmailData.grid(column=1, row=i + 3, padx=10, pady=5)
 
+            # Password
+            lblPassData = ttk.Label(scrollable_frame, text="********", font=("Helvetica", 12))
+            lblPassData.grid(column=2, row=i + 3, padx=10, pady=5)
+
+            # Website
+            lblWebData = ttk.Label(scrollable_frame, text=decrypted_website, font=("Helvetica", 12))
+            lblWebData.grid(column=0, row=i + 3, padx=10, pady=5)
+        else:
+            continue
         # Username
         lblEmailData = ttk.Label(scrollable_frame, text=decrypted_username, font=("Helvetica", 12))
         lblEmailData.grid(column=1, row=i + 3, padx=10, pady=5)
@@ -523,7 +550,7 @@ def vaultScreen():
                 encrypted_new_password = encrypt(new_password.encode(), encryptionKey)
                 cursor.execute("UPDATE vault SET password = ? WHERE id = ?", (encrypted_new_password, entry_id))
                 db.commit()
-                vaultScreen()
+                vaultScreen("")
 
         btnUpdate = ttk.Button(scrollable_frame, text="Update", command=lambda id=entry_id: updatePassword(id))
         btnUpdate.grid(column=5, row=i + 3, padx=10, pady=5)
@@ -532,18 +559,13 @@ def vaultScreen():
         def removeEntry(entry_id):
             cursor.execute("DELETE FROM vault WHERE id = ?", (entry_id,))
             db.commit()
-            vaultScreen()
+            vaultScreen("")
 
         btnDelete = ttk.Button(scrollable_frame, text="Delete", command=lambda id=entry_id: removeEntry(id))
         btnDelete.grid(column=6, row=i + 3, padx=10, pady=5)
 
     # Ensure content is centered within the canvas
     scrollable_frame.grid_rowconfigure(len(entries) + 3, weight=1)  # Allow content to expand vertically
-
-
-
-
-
 
 
 
