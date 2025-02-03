@@ -453,7 +453,14 @@ def vaultScreen():
         print(f"Generated Password: {random_password}")  # For testing/debugging
 
     btnGeneratePassword = ttk.Button(scrollable_frame, text="Generate Random Password", command=generateRandomPassword)
-    btnGeneratePassword.grid(column=3, pady=10, row=2)
+    btnGeneratePassword.grid(column=3, pady=10, row=2, padx=20)
+
+    lblCopy = ttk.Label(scrollable_frame, text="Copy", font=("Helvetica", 12, "bold"))
+    lblCopy.grid(column=4, row=2, pady=10, padx=20)
+    lblUpdate = ttk.Label(scrollable_frame, text="Update", font=("Helvetica", 12, "bold"))
+    lblUpdate.grid(column=5, row=2, pady=10,padx=20)
+    lblDel = ttk.Label(scrollable_frame, text="Delete", font=("Helvetica", 12, "bold"))
+    lblDel.grid(column=6, row=2, pady=10,padx=20)
 
     # Add Entry Button
     def addEntry():
